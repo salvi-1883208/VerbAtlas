@@ -16,7 +16,12 @@ import it.uniroma1.nlp.kb.SelectionalPreference;
 import it.uniroma1.nlp.kb.TextLoader;
 import it.uniroma1.nlp.kb.VerbAtlasFrameID;
 import it.uniroma1.nlp.kb.WordNetSynsetID;
-
+/**
+ * 
+ * @author Marco Salvi
+ * Classe principale
+ *
+ */
 public class VerbAtlas implements Iterable<VerbAtlasFrame>
 {
 	private static VerbAtlas instance;
