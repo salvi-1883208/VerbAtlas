@@ -4,6 +4,8 @@ public abstract class ResourceID
 {
 	private String id;
 
+	
+	// Classe degli id boh
 	public ResourceID(String id)
 	{
 		this.id = id;
