@@ -19,7 +19,7 @@ import it.uniroma1.nlp.kb.WordNetSynsetID;
 /**
  * 
  * @author Marco Salvi
- * Classe principale
+ * Classe principale del progetto VerbAtlas
  *
  */
 public class VerbAtlas implements Iterable<VerbAtlasFrame>
