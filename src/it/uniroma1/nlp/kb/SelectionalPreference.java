@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 
-public class SelectionalPreference
+public class SelectionalPreference implements Comparable<SelectionalPreference>
 {
 	private Role role;
 	private PreferenceID preferenceId;
@@ -18,12 +18,14 @@ public class SelectionalPreference
 		this.preferenceId = preferenceId;
 
 		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_preference_ids.tsv"))
+		{
 			if (line.substring(0, line.indexOf("\t")).equals(preferenceId.getId()))
 			{
 				babelId = new BabelNetSynsetID(line.substring(line.indexOf("\t") + 1, line.lastIndexOf("\t")));
 				preferenceName = line.substring(line.lastIndexOf("\t") + 1);
 				break;
 			}
+		}
 	}
 
 	public PreferenceID getId()
@@ -44,5 +46,17 @@ public class SelectionalPreference
 	public Role getRole()
 	{
 		return role;
+	}
+
+	@Override
+	public int compareTo(SelectionalPreference sp)
+	{
+		return preferenceName.compareTo(sp.getName());
+	}
+	
+	@Override
+	public String toString()
+	{
+		return preferenceName;
 	}
 }

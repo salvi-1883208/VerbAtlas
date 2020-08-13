@@ -15,22 +15,9 @@ public class Main
 {
 	public static void main(String[] args) throws IOException, URISyntaxException
 	{
-//		List<String> list = TextLoader.loadTxt("Verbatlas-1.0.3/VA_va2pas.tsv");
-//		TreeSet<String> result = new TreeSet<String>();
-//		
-//		for(String line : list)
-//		{
-//			for(String parola : line.split("\t"))
-//			{
-//				if(Character.isUpperCase(parola.charAt(0)))
-//					result.add(parola.toUpperCase());
-//			}
-//		}
-//		System.out.println(result);
-		
 		VerbAtlas va = VerbAtlas.getInstance();
 		System.out.println(va.getFrame(new BabelNetSynsetID("bn:00084554v")));
-		
+
 //		for(BabelNetSynsetID bns : va.getFrame("HIT"))
 //		{
 //			System.out.println(bns);

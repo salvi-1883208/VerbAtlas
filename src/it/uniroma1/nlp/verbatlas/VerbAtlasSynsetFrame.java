@@ -2,6 +2,8 @@ package it.uniroma1.nlp.verbatlas;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 
 import it.uniroma1.nlp.kb.BabelNetSynsetID;
@@ -29,19 +31,15 @@ public class VerbAtlasSynsetFrame implements Frame
 		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_bn2sp.tsv"))
 			if (line.substring(0, line.indexOf("\t")).equals(synsetId.getId()))
 				for (Role role : roles)
-				{
-					if (line.contains(role.toString()))
+					if (line.contains(role.getType()))
 					{
-						int start = line.indexOf(role.toString()) + role.toString().length() + 1;
-						int end = line.substring(line.indexOf(role.toString()) + role.toString().length() + 1)
-								.indexOf("\t") + line.indexOf(role.toString()) + role.toString().length() + 1;
+						int start = line.indexOf(role.getType()) + role.getType().length() + 1;
+						int end = line.substring(line.indexOf(role.getType()) + role.getType().length() + 1)
+								.indexOf("\t") + line.indexOf(role.getType()) + role.getType().length() + 1;
 						String strRoles = line.substring(start, end);
 						for (String strId : strRoles.split("\\|"))
-						{
 							role.addSelectionalPreference(new SelectionalPreference(role, new PreferenceID(strId)));
-						}
 					}
-				}
 	}
 
 	public VerbAtlasFrame toFrame()
@@ -65,6 +63,15 @@ public class VerbAtlasSynsetFrame implements Frame
 	public TreeSet<Role> getRoles()
 	{
 		return roles;
+	}
+
+	@Override
+	public String toString()
+	{
+		List<String> strings = new ArrayList<String>();
+		for (Role role : roles)
+			strings.add(role.toString());
+		return "BabelNetSynsetID: " + synsetId + "\nRoles: \n\t" + String.join(",\n\t", strings);
 	}
 
 }

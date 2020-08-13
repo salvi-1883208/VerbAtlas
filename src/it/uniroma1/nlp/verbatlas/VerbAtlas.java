@@ -16,10 +16,10 @@ import it.uniroma1.nlp.kb.SelectionalPreference;
 import it.uniroma1.nlp.kb.TextLoader;
 import it.uniroma1.nlp.kb.VerbAtlasFrameID;
 import it.uniroma1.nlp.kb.WordNetSynsetID;
+
 /**
  * 
- * @author Marco Salvi
- * Classe principale del progetto VerbAtlas
+ * @author Marco Salvi Classe principale del progetto VerbAtlas
  *
  */
 public class VerbAtlas implements Iterable<VerbAtlasFrame>
@@ -57,21 +57,29 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 	public Frame getFrame(ResourceID id) throws IOException, URISyntaxException
 	{
 		if (id instanceof VerbAtlasFrameID)
-			for (VerbAtlasFrame frame : frames)
-				if (id.equals(frame.getId()))
-					return frame;
+			toVerbAtlasFrame((VerbAtlasFrameID) id);
 
 		if (id instanceof BabelNetSynsetID)
 			for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_bn2va.tsv"))
 				if (line.substring(0, line.indexOf("\t")).equals(id.getId()))
 				{
-					System.out.println(line.substring(line.indexOf("\t") + 1));
-					return getFrame(line.substring(line.indexOf("\t") + 1)).toSynsetFrame((BabelNetSynsetID) id);
+					System.out.println();
+					return toVerbAtlasFrame(new VerbAtlasFrameID(line.substring(line.indexOf("\t") + 1)))
+							.toSynsetFrame((BabelNetSynsetID) id);
 				}
 
 		// TODO PropBank WordNet
 
 		return null; // da togliere
+	}
+
+	private VerbAtlasFrame toVerbAtlasFrame(VerbAtlasFrameID id)
+	{
+		for (VerbAtlasFrame frame : frames)
+			if (id.equals(frame.getId()))
+				return frame;
+		// throw exception
+		return null;
 	}
 
 	public HashSet<VerbAtlasFrame> getFramesByVerb()
@@ -147,7 +155,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			// TODO restituisce il corrispondente frame "focalizzato" sul synset, ovvero
 			// avente le corrispondenti preferenze di selezione.
 			// Usare un sistema di Factory per i VerbAtlasSynsetFrame.
-			return new VerbAtlasSynsetFrame(this, id, roles); //devo usare una FACTORY
+			return new VerbAtlasSynsetFrame(this, id, roles); // devo usare una FACTORY
 		}
 
 		public VerbAtlasSynsetFrame toSynsetFrame(WordNetSynsetID id)
@@ -230,7 +238,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		{
 			private VerbAtlasFrameID frameId;
 			private Type type;
-			private TreeSet<SelectionalPreference> sp;
+			private TreeSet<SelectionalPreference> sp = new TreeSet<SelectionalPreference>();
 
 			public Role(String type, VerbAtlasFrameID frameId)
 			{
@@ -255,6 +263,14 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				return null;
 			}
 
+			public String getType()
+			{
+				String role = type.toString();
+				role = role.toLowerCase();
+				role = role.substring(0, 1).toUpperCase() + role.substring(1); // First Letter Only Uppercase
+				return role;
+			}
+
 			@Override
 			public int compareTo(Role o)
 			{
@@ -264,7 +280,10 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			@Override
 			public String toString()
 			{
-				return type.toString();
+				List<String> strings = new ArrayList<String>();
+				for (SelectionalPreference sel : sp)
+					strings.add(sel.toString());
+				return "Tipo: " + type.toString() + " --> [" + String.join(", ", strings) + "]";
 			}
 
 			enum Type
