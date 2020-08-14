@@ -2,6 +2,7 @@ package it.uniroma1.nlp.kb;
 
 public abstract class ResourceID
 {
+	//TODO implementare equals e hashcode
 	private String id;
 
 	public ResourceID(String id)

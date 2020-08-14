@@ -7,6 +7,7 @@ import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 
 public class SelectionalPreference implements Comparable<SelectionalPreference>
 {
+	// TODO implementare equals e hashcode
 	private Role role;
 	private PreferenceID preferenceId;
 	private String preferenceName;
@@ -53,7 +54,7 @@ public class SelectionalPreference implements Comparable<SelectionalPreference>
 	{
 		return preferenceName.compareTo(sp.getName());
 	}
-	
+
 	@Override
 	public String toString()
 	{

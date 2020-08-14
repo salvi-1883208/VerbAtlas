@@ -15,6 +15,7 @@ import it.uniroma1.nlp.kb.ResourceID;
 import it.uniroma1.nlp.kb.SelectionalPreference;
 import it.uniroma1.nlp.kb.TextLoader;
 import it.uniroma1.nlp.kb.VerbAtlasFrameID;
+import it.uniroma1.nlp.kb.VerbAtlasSynsetFrameFactory;
 import it.uniroma1.nlp.kb.WordNetSynsetID;
 
 /**
@@ -51,26 +52,25 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			if (frame.getName().equals(name))
 				return frame;
 		// TODO throw exception "frame <name> non trovato"
+		System.out.println("FRAME "+name+" DOESN'T EXIST ERROR");
 		return null;
 	}
 
 	public Frame getFrame(ResourceID id) throws IOException, URISyntaxException
 	{
 		if (id instanceof VerbAtlasFrameID)
-			toVerbAtlasFrame((VerbAtlasFrameID) id);
+			return toVerbAtlasFrame((VerbAtlasFrameID) id);
 
 		if (id instanceof BabelNetSynsetID)
-			for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_bn2va.tsv"))
-				if (line.substring(0, line.indexOf("\t")).equals(id.getId()))
-				{
-					System.out.println();
-					return toVerbAtlasFrame(new VerbAtlasFrameID(line.substring(line.indexOf("\t") + 1)))
-							.toSynsetFrame((BabelNetSynsetID) id);
-				}
+			return toVerbAtlasFrame(((BabelNetSynsetID) id).toVerbAtlasID()).toSynsetFrame((BabelNetSynsetID) id);
 
-		// TODO PropBank WordNet
+		if (id instanceof WordNetSynsetID)
+			return getFrame(((WordNetSynsetID) id).toBabelID());
 
-		return null; // da togliere
+		// TODO PropBank
+
+		System.out.println("ID TO FRAME ERROR");
+		return null; // throw exception 
 	}
 
 	private VerbAtlasFrame toVerbAtlasFrame(VerbAtlasFrameID id)
@@ -79,17 +79,23 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			if (id.equals(frame.getId()))
 				return frame;
 		// throw exception
+		System.out.println("TO VERBATLASFRAME ERROR");
 		return null;
 	}
 
-	public HashSet<VerbAtlasFrame> getFramesByVerb()
+	public HashSet<VerbAtlasFrame> getFramesByVerb(String verb) throws IOException, URISyntaxException
 	{
 		// TODO cercare tutti i frame che contengono un verbo fornito in input,
 		// restituisce l'insieme dei frame che si riferiscono ai vari significati di
 		// "run"
 		// e contengono i synset corrispondenti. I sinonimi di ogni synset verbale sono
 		// nel file wn2lemma.tsv
-		return null;
+		HashSet<VerbAtlasFrame> frames = new HashSet<VerbAtlasFrame>();
+		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/wn2lemma.tsv"))
+			if (line.contains(verb.toLowerCase()))
+				frames.add(toVerbAtlasFrame(
+						new WordNetSynsetID(line.substring(0, line.indexOf("\t"))).toBabelID().toVerbAtlasID()));
+		return frames;
 	}
 
 	public VerbAtlasVersion getVersion()
@@ -105,10 +111,12 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 
 	public static class VerbAtlasFrame implements Frame, Iterable<BabelNetSynsetID>
 	{
+		// TODO implementare equals e hashcode
 		private String name;
 		private HashSet<BabelNetSynsetID> babelSynsetIds;
 		private VerbAtlasFrameID frameId;
 		private TreeSet<Role> roles;
+		private VerbAtlasSynsetFrameFactory synsetFactory = new VerbAtlasSynsetFrameFactory();
 
 		// Costruttore privato necessario
 		private VerbAtlasFrame(String name, VerbAtlasFrameID frameId) throws IOException, URISyntaxException
@@ -152,18 +160,12 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 
 		public VerbAtlasSynsetFrame toSynsetFrame(BabelNetSynsetID id) throws IOException, URISyntaxException
 		{
-			// TODO restituisce il corrispondente frame "focalizzato" sul synset, ovvero
-			// avente le corrispondenti preferenze di selezione.
-			// Usare un sistema di Factory per i VerbAtlasSynsetFrame.
-			return new VerbAtlasSynsetFrame(this, id, roles); // devo usare una FACTORY
+			return synsetFactory.buildSynsetFrame(id, this, roles);
 		}
 
-		public VerbAtlasSynsetFrame toSynsetFrame(WordNetSynsetID id)
+		public VerbAtlasSynsetFrame toSynsetFrame(WordNetSynsetID id) throws IOException, URISyntaxException
 		{
-			// TODO restituisce il corrispondente frame "focalizzato" sul synset, ovvero
-			// avente le corrispondenti preferenze di selezione.
-			// Usare un sistema di Factory per i VerbAtlasSynsetFrame.
-			return null;
+			return synsetFactory.buildSynsetFrame(id, this, roles);
 		}
 
 		@Override
@@ -201,8 +203,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				ids.add(babelId.getId());
 
 			return "Frame Name: " + name + "	Frame ID: " + frameId.getId() + "\n" + "Roles: \n\t"
-					+ String.join(",\n\t", roles) + "\n" + "BabelNet Synset IDs: \n\t" + String.join(",\n\t", ids)
-					+ "\n";
+					+ String.join(",\n\t", roles) + "\n" + "BabelNet Synset IDs: \n\t" + String.join(", ", ids) + "\n";
 		}
 
 		public static class Builder
@@ -236,6 +237,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 
 		public static class Role implements Comparable<Role>
 		{
+			// TODO implementare equals e hashcode
 			private VerbAtlasFrameID frameId;
 			private Type type;
 			private TreeSet<SelectionalPreference> sp = new TreeSet<SelectionalPreference>();
@@ -283,7 +285,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				List<String> strings = new ArrayList<String>();
 				for (SelectionalPreference sel : sp)
 					strings.add(sel.toString());
-				return "Tipo: " + type.toString() + " --> [" + String.join(", ", strings) + "]";
+				return "Type: " + type.toString() + " --> [" + String.join(", ", strings) + "]";
 			}
 
 			enum Type

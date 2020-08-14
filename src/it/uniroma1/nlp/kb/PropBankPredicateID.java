@@ -8,4 +8,6 @@ public class PropBankPredicateID extends ResourceID
 	}
 	
 	//usare super.getId() per ottenere l'id
+	
+	//TODO metodo per convertire da propbank a verbatlas (pb2va.tsv)
 }
