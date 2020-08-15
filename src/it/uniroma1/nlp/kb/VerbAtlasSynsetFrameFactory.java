@@ -1,10 +1,12 @@
 package it.uniroma1.nlp.kb;
 
 import java.io.IOException;
+
 import java.net.URISyntaxException;
 import java.util.TreeSet;
 
-import it.uniroma1.nlp.verbatlas.VerbAtlas;
+import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
+import it.uniroma1.nlp.kb.exceptions.WordNetIDToLemmaException;
 import it.uniroma1.nlp.verbatlas.VerbAtlasSynsetFrame;
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame;
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
@@ -12,12 +14,12 @@ import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 public class VerbAtlasSynsetFrameFactory
 {
 	public VerbAtlasSynsetFrame buildSynsetFrame(BabelNetSynsetID id, VerbAtlasFrame frame, TreeSet<Role> roles)
-			throws IOException, URISyntaxException
+			throws VerbAtlasException, IOException, URISyntaxException
 	{
 		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_bn2sp.tsv"))
-			if (line.substring(0, line.indexOf("\t")).equals(id.getId()))
+			if (line.startsWith(id.getId()))
 				for (Role role : roles)
-					if (line.contains(role.getType()))
+					if (line.indexOf(role.getType()) != -1)
 					{
 						int start = line.indexOf(role.getType()) + role.getType().length() + 1;
 						int end = line.substring(line.indexOf(role.getType()) + role.getType().length() + 1)
@@ -31,13 +33,13 @@ public class VerbAtlasSynsetFrameFactory
 							role.addSelectionalPreference(new SelectionalPreference(role, new PreferenceID(strId)));
 					}
 		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/wn2lemma.tsv"))
-			if (line.contains(id.toWordNetID().getId()))
+			if (line.startsWith(id.toWordNetID().getId()))
 				return new VerbAtlasSynsetFrame(frame, id, roles, line.substring(line.indexOf("\t") + 1));
-		return null; // TODO throw exception
+		throw new WordNetIDToLemmaException("ID '" + id.toWordNetID() + "' does not exist");
 	}
 
 	public VerbAtlasSynsetFrame buildSynsetFrame(WordNetSynsetID id, VerbAtlasFrame frame, TreeSet<Role> roles)
-			throws IOException, URISyntaxException
+			throws VerbAtlasException, IOException, URISyntaxException
 	{
 		return buildSynsetFrame(id.toBabelID(), frame, roles);
 	}

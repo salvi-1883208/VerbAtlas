@@ -7,7 +7,6 @@ import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 
 public class SelectionalPreference implements Comparable<SelectionalPreference>
 {
-	// TODO implementare equals e hashcode
 	private Role role;
 	private PreferenceID preferenceId;
 	private String preferenceName;
@@ -19,14 +18,12 @@ public class SelectionalPreference implements Comparable<SelectionalPreference>
 		this.preferenceId = preferenceId;
 
 		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_preference_ids.tsv"))
-		{
-			if (line.substring(0, line.indexOf("\t")).equals(preferenceId.getId()))
+			if (line.startsWith(preferenceId.getId()))
 			{
 				babelId = new BabelNetSynsetID(line.substring(line.indexOf("\t") + 1, line.lastIndexOf("\t")));
 				preferenceName = line.substring(line.lastIndexOf("\t") + 1);
 				break;
 			}
-		}
 	}
 
 	public PreferenceID getId()
@@ -53,6 +50,24 @@ public class SelectionalPreference implements Comparable<SelectionalPreference>
 	public int compareTo(SelectionalPreference sp)
 	{
 		return preferenceName.compareTo(sp.getName());
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (o == this)
+			return true;
+		if (o == null || o.getClass() != this.getClass())
+			return false;
+
+		SelectionalPreference sp = (SelectionalPreference) o;
+		return sp.getId().equals(getId());
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return preferenceId.hashCode();
 	}
 
 	@Override

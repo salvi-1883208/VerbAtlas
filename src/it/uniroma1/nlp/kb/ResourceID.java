@@ -2,7 +2,6 @@ package it.uniroma1.nlp.kb;
 
 public abstract class ResourceID
 {
-	//TODO implementare equals e hashcode
 	private String id;
 
 	public ResourceID(String id)
@@ -34,5 +33,11 @@ public abstract class ResourceID
 		ResourceID id = (ResourceID) o;
 
 		return this.id.equals(id.getId());
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return id.hashCode();
 	}
 }

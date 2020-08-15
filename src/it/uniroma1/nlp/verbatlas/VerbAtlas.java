@@ -6,17 +6,26 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeSet;
 
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame;
 import it.uniroma1.nlp.kb.BabelNetSynsetID;
 import it.uniroma1.nlp.kb.Frame;
+import it.uniroma1.nlp.kb.PropBankPredicateID;
 import it.uniroma1.nlp.kb.ResourceID;
 import it.uniroma1.nlp.kb.SelectionalPreference;
 import it.uniroma1.nlp.kb.TextLoader;
 import it.uniroma1.nlp.kb.VerbAtlasFrameID;
 import it.uniroma1.nlp.kb.VerbAtlasSynsetFrameFactory;
 import it.uniroma1.nlp.kb.WordNetSynsetID;
+import it.uniroma1.nlp.kb.exceptions.BabelNetSynsetIDToVerbAtlasFrameIDException;
+import it.uniroma1.nlp.kb.exceptions.BabelNetSynsetIDToWordNetSynsetIDException;
+import it.uniroma1.nlp.kb.exceptions.FrameDoesNotExist;
+import it.uniroma1.nlp.kb.exceptions.IdToFrameException;
+import it.uniroma1.nlp.kb.exceptions.PropBankPredicateIDToVerbAtlasIDException;
+import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
+import it.uniroma1.nlp.kb.exceptions.WordNetIDToLemmaException;
 
 /**
  * 
@@ -35,8 +44,8 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		frames = new HashSet<VerbAtlasFrame>();
 
 		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_frame_ids.tsv"))
-			frames.add(
-					new VerbAtlasFrame(line.substring(9), new VerbAtlasFrameID(line.substring(0, line.indexOf("\t")))));
+			frames.add(new VerbAtlasFrame(line.substring(line.indexOf("\t") + 1),
+					new VerbAtlasFrameID(line.substring(0, line.indexOf("\t")))));
 	}
 
 	public static VerbAtlas getInstance() throws IOException, URISyntaxException
@@ -46,17 +55,15 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		return instance;
 	}
 
-	public VerbAtlasFrame getFrame(String name)
+	public VerbAtlasFrame getFrame(String name) throws FrameDoesNotExist
 	{
 		for (VerbAtlasFrame frame : frames)
 			if (frame.getName().equals(name))
 				return frame;
-		// TODO throw exception "frame <name> non trovato"
-		System.out.println("FRAME "+name+" DOESN'T EXIST ERROR");
-		return null;
+		throw new FrameDoesNotExist("Frame " + name + " does not exist");
 	}
 
-	public Frame getFrame(ResourceID id) throws IOException, URISyntaxException
+	public Frame getFrame(ResourceID id) throws IOException, URISyntaxException, VerbAtlasException
 	{
 		if (id instanceof VerbAtlasFrameID)
 			return toVerbAtlasFrame((VerbAtlasFrameID) id);
@@ -67,32 +74,31 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		if (id instanceof WordNetSynsetID)
 			return getFrame(((WordNetSynsetID) id).toBabelID());
 
-		// TODO PropBank
+		if (id instanceof PropBankPredicateID)
+			return getFrame(((PropBankPredicateID) id).toVerbAtlasID());
 
-		System.out.println("ID TO FRAME ERROR");
-		return null; // throw exception 
+		throw new IdToFrameException("ID '" + id.getId() + "' does not exist");
 	}
 
-	private VerbAtlasFrame toVerbAtlasFrame(VerbAtlasFrameID id)
+	private VerbAtlasFrame toVerbAtlasFrame(VerbAtlasFrameID id) throws IdToFrameException
 	{
 		for (VerbAtlasFrame frame : frames)
 			if (id.equals(frame.getId()))
 				return frame;
-		// throw exception
-		System.out.println("TO VERBATLASFRAME ERROR");
-		return null;
+		throw new IdToFrameException("ID '" + id.getId() + "' does not exist");
 	}
 
-	public HashSet<VerbAtlasFrame> getFramesByVerb(String verb) throws IOException, URISyntaxException
+	public HashSet<VerbAtlasFrame> getFramesByVerb(String verb)
+			throws VerbAtlasException, IOException, URISyntaxException
 	{
-		// TODO cercare tutti i frame che contengono un verbo fornito in input,
+		// cercare tutti i frame che contengono un verbo fornito in input,
 		// restituisce l'insieme dei frame che si riferiscono ai vari significati di
 		// "run"
 		// e contengono i synset corrispondenti. I sinonimi di ogni synset verbale sono
 		// nel file wn2lemma.tsv
 		HashSet<VerbAtlasFrame> frames = new HashSet<VerbAtlasFrame>();
 		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/wn2lemma.tsv"))
-			if (line.contains(verb.toLowerCase()))
+			if (line.endsWith(verb.toLowerCase()))
 				frames.add(toVerbAtlasFrame(
 						new WordNetSynsetID(line.substring(0, line.indexOf("\t"))).toBabelID().toVerbAtlasID()));
 		return frames;
@@ -111,7 +117,6 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 
 	public static class VerbAtlasFrame implements Frame, Iterable<BabelNetSynsetID>
 	{
-		// TODO implementare equals e hashcode
 		private String name;
 		private HashSet<BabelNetSynsetID> babelSynsetIds;
 		private VerbAtlasFrameID frameId;
@@ -139,7 +144,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		{
 			HashSet<BabelNetSynsetID> synsetIds = new HashSet<BabelNetSynsetID>();
 			for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_bn2va.tsv"))
-				if (line.substring(line.indexOf("\t") + 1).equals(frameId.getId()))
+				if (line.endsWith(frameId.getId()))
 					synsetIds.add(new BabelNetSynsetID(line.substring(0, line.indexOf("\t")).strip()));
 			return synsetIds;
 		}
@@ -148,7 +153,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		{
 			TreeSet<Role> roles = new TreeSet<Role>();
 			for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_va2pas.tsv"))
-				if (line.substring(0, line.indexOf("\t")).equals(frameId.getId()))
+				if (line.startsWith(frameId.getId()))
 				{
 					for (String role : line.substring(line.indexOf("\t") + 1).split("\t"))
 						if (!role.isEmpty())
@@ -158,12 +163,12 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			return roles;
 		}
 
-		public VerbAtlasSynsetFrame toSynsetFrame(BabelNetSynsetID id) throws IOException, URISyntaxException
+		public VerbAtlasSynsetFrame toSynsetFrame(BabelNetSynsetID id) throws IOException, URISyntaxException, VerbAtlasException
 		{
 			return synsetFactory.buildSynsetFrame(id, this, roles);
 		}
 
-		public VerbAtlasSynsetFrame toSynsetFrame(WordNetSynsetID id) throws IOException, URISyntaxException
+		public VerbAtlasSynsetFrame toSynsetFrame(WordNetSynsetID id) throws IOException, URISyntaxException, VerbAtlasException
 		{
 			return synsetFactory.buildSynsetFrame(id, this, roles);
 		}
@@ -190,6 +195,24 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		public Iterator<BabelNetSynsetID> iterator()
 		{
 			return babelSynsetIds.iterator();
+		}
+
+		@Override
+		public boolean equals(Object o)
+		{
+			if (this == o)
+				return true;
+			if (o == null || o.getClass() != this.getClass())
+				return false;
+
+			VerbAtlasFrame frame = (VerbAtlasFrame) o;
+			return frame.getId().equals(this.frameId);
+		}
+
+		@Override
+		public int hashCode()
+		{
+			return frameId.hashCode();
 		}
 
 		@Override
@@ -237,7 +260,6 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 
 		public static class Role implements Comparable<Role>
 		{
-			// TODO implementare equals e hashcode
 			private VerbAtlasFrameID frameId;
 			private Type type;
 			private TreeSet<SelectionalPreference> sp = new TreeSet<SelectionalPreference>();
@@ -273,10 +295,33 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				return role;
 			}
 
+			public TreeSet<SelectionalPreference> getSelectionalPreferences()
+			{
+				return sp;
+			}
+
 			@Override
 			public int compareTo(Role o)
 			{
 				return type.toString().compareTo(o.toString());
+			}
+
+			@Override
+			public boolean equals(Object o)
+			{
+				if (o == this)
+					return true;
+				if (o == null || o.getClass() != this.getClass())
+					return false;
+
+				Role role = (Role) o;
+				return role.getSelectionalPreferences().equals(this.sp) && role.getType().equals(getType());
+			}
+
+			@Override
+			public int hashCode()
+			{
+				return Objects.hash(sp, type);
 			}
 
 			@Override
