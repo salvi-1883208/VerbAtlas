@@ -24,7 +24,9 @@ public class Main
 {
 	public static void main(String[] args) throws IOException, URISyntaxException, VerbAtlasException
 	{
+
 		VerbAtlas va = VerbAtlas.getInstance();
+
 //		PrintStream fileStream = new PrintStream("BabelNetSynsetFrames.txt");
 //		System.setOut(fileStream);
 //		for (VerbAtlasFrame vaf : va)
