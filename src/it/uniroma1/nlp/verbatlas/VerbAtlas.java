@@ -21,6 +21,7 @@ import it.uniroma1.nlp.kb.SelectionalPreference;
 import it.uniroma1.nlp.kb.TextLoader;
 import it.uniroma1.nlp.kb.VerbAtlasFrameID;
 import it.uniroma1.nlp.kb.VerbAtlasSynsetFrameFactory;
+import it.uniroma1.nlp.kb.VerbAtlasVersion;
 import it.uniroma1.nlp.kb.WordNetSynsetID;
 import it.uniroma1.nlp.kb.exceptions.FrameDoesNotExist;
 import it.uniroma1.nlp.kb.exceptions.IdToFrameException;

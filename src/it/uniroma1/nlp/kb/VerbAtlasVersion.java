@@ -1,4 +1,4 @@
-package it.uniroma1.nlp.verbatlas;
+package it.uniroma1.nlp.kb;
 
 import java.io.File;
 import java.io.FilenameFilter;
