@@ -1,12 +1,15 @@
 package it.uniroma1.nlp.verbatlas;
 
 import java.io.IOException;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame;
@@ -19,13 +22,9 @@ import it.uniroma1.nlp.kb.TextLoader;
 import it.uniroma1.nlp.kb.VerbAtlasFrameID;
 import it.uniroma1.nlp.kb.VerbAtlasSynsetFrameFactory;
 import it.uniroma1.nlp.kb.WordNetSynsetID;
-import it.uniroma1.nlp.kb.exceptions.BabelNetSynsetIDToVerbAtlasFrameIDException;
-import it.uniroma1.nlp.kb.exceptions.BabelNetSynsetIDToWordNetSynsetIDException;
 import it.uniroma1.nlp.kb.exceptions.FrameDoesNotExist;
 import it.uniroma1.nlp.kb.exceptions.IdToFrameException;
-import it.uniroma1.nlp.kb.exceptions.PropBankPredicateIDToVerbAtlasIDException;
 import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
-import it.uniroma1.nlp.kb.exceptions.WordNetIDToLemmaException;
 
 /**
  * 
@@ -104,6 +103,9 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		return frames;
 	}
 
+	// TODO getSynsetByVerb, stessa cosa di get Frames By Verb ma restituisce i
+	// synset che contengono il verbo, non i frame
+
 	public VerbAtlasVersion getVersion()
 	{
 		return version;
@@ -118,7 +120,9 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 	public static class VerbAtlasFrame implements Frame, Iterable<BabelNetSynsetID>
 	{
 		private String name;
-		private HashSet<BabelNetSynsetID> babelSynsetIds;
+
+		private HashMap<BabelNetSynsetID, VerbAtlasSynsetFrame> synsets = new HashMap<BabelNetSynsetID, VerbAtlasSynsetFrame>();
+		private Set<BabelNetSynsetID> babelSynsetIds = synsets.keySet();
 		private VerbAtlasFrameID frameId;
 		private TreeSet<Role> roles;
 		private VerbAtlasSynsetFrameFactory synsetFactory = new VerbAtlasSynsetFrameFactory();
@@ -136,7 +140,10 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			this.name = name;
 			this.frameId = frameId;
 			this.roles = roles;
-			this.babelSynsetIds = babelSynsetIds;
+
+			// TODO usare stream?
+			for (BabelNetSynsetID synsetId : babelSynsetIds)
+				synsets.put(synsetId, null);
 		}
 
 		private static HashSet<BabelNetSynsetID> readSynsetIds(VerbAtlasFrameID frameId)
@@ -157,20 +164,27 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				{
 					for (String role : line.substring(line.indexOf("\t") + 1).split("\t"))
 						if (!role.isEmpty())
-							roles.add(new Role(role, frameId));
+							roles.add(new Role(role /* , frameId */));
 					break;
 				}
 			return roles;
 		}
 
-		public VerbAtlasSynsetFrame toSynsetFrame(BabelNetSynsetID id) throws IOException, URISyntaxException, VerbAtlasException
+		public VerbAtlasSynsetFrame toSynsetFrame(BabelNetSynsetID id)
+				throws IOException, URISyntaxException, VerbAtlasException
 		{
-			return synsetFactory.buildSynsetFrame(id, this, roles);
+			if (synsets.get(id) == null)
+			{
+				synsets.put(id, synsetFactory.buildSynsetFrame(id, this, roles));
+				return synsets.get(id);
+			}
+			return synsets.get(id);
 		}
 
-		public VerbAtlasSynsetFrame toSynsetFrame(WordNetSynsetID id) throws IOException, URISyntaxException, VerbAtlasException
+		public VerbAtlasSynsetFrame toSynsetFrame(WordNetSynsetID id)
+				throws IOException, URISyntaxException, VerbAtlasException
 		{
-			return synsetFactory.buildSynsetFrame(id, this, roles);
+			return toSynsetFrame(id.toBabelID());
 		}
 
 		@Override
@@ -260,14 +274,14 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 
 		public static class Role implements Comparable<Role>
 		{
-			private VerbAtlasFrameID frameId;
+//			private VerbAtlasFrameID frameId;
 			private Type type;
 			private TreeSet<SelectionalPreference> sp = new TreeSet<SelectionalPreference>();
 
-			public Role(String type, VerbAtlasFrameID frameId)
+			public Role(String type /* , VerbAtlasFrameID frameId */)
 			{
 				this.type = Type.valueOf(type.replace('-', '_').toUpperCase());
-				this.frameId = frameId;
+//				this.frameId = frameId;
 			}
 
 			public void addSelectionalPreference(SelectionalPreference sp)
@@ -303,7 +317,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			@Override
 			public int compareTo(Role o)
 			{
-				return type.toString().compareTo(o.toString());
+				return getType().compareTo(o.getType());
 			}
 
 			@Override

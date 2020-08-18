@@ -18,8 +18,9 @@ public class VerbAtlasSynsetFrameFactory
 	{
 		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_bn2sp.tsv"))
 			if (line.startsWith(id.getId()))
+			{
 				for (Role role : roles)
-					if (line.indexOf(role.getType()) != -1)
+					if (line.contains(role.getType()))
 					{
 						int start = line.indexOf(role.getType()) + role.getType().length() + 1;
 						int end = line.substring(line.indexOf(role.getType()) + role.getType().length() + 1)
@@ -32,15 +33,11 @@ public class VerbAtlasSynsetFrameFactory
 						for (String strId : strRoles.split("\\|"))
 							role.addSelectionalPreference(new SelectionalPreference(role, new PreferenceID(strId)));
 					}
+				break;
+			}
 		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/wn2lemma.tsv"))
 			if (line.startsWith(id.toWordNetID().getId()))
 				return new VerbAtlasSynsetFrame(frame, id, roles, line.substring(line.indexOf("\t") + 1));
-		throw new WordNetIDToLemmaException("ID '" + id.toWordNetID() + "' does not exist");
-	}
-
-	public VerbAtlasSynsetFrame buildSynsetFrame(WordNetSynsetID id, VerbAtlasFrame frame, TreeSet<Role> roles)
-			throws VerbAtlasException, IOException, URISyntaxException
-	{
-		return buildSynsetFrame(id.toBabelID(), frame, roles);
+		throw new WordNetIDToLemmaException("WordNetID '" + id.toWordNetID() + "' does not exist");
 	}
 }

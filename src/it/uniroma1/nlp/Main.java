@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import it.uniroma1.nlp.kb.BabelNetSynsetID;
@@ -31,21 +33,52 @@ public class Main
 //		System.setOut(fileStream);
 //		for (VerbAtlasFrame vaf : va)
 //			for (BabelNetSynsetID babid : vaf)
+//			{
+//				if (babid.getId().equals("bn:00015081n") || babid.getId().equals("bn:03572679n"))
+//					continue;
 //				System.out.println(vaf.toSynsetFrame(babid) + "\n\n"
 //						+ "-------------------------------------------------------------" + "\n");
+//			}
 //		System.out.println("FINITO");
 
 //		System.out.println(va.getFrame(new WordNetSynsetID("wn:01168468v")));
-//		System.out.println(va.getFrame(new BabelNetSynsetID("bn:00083231v")));
-//		System.out.println(va.getFrame(new VerbAtlasFrameID("va:0428f")));
+//		System.out.println(va.getFrame(new BabelNetSynsetID("bn:00015081n")));
+//		System.out.println(va.getFrame(new VerbAtlasFrameID("va:0463f")));
 //		System.out.println(va.getFrame(new PropBankPredicateID("abet.01")));
 //		System.out.println(va.getFrame("EAT_BITE"));
+//		for(VerbAtlasFrame frame : va.getFramesByVerb("hit"))
+//			System.out.println(frame);
 
 //		for (VerbAtlasFrame frame : va.getFramesByVerb("eat"))
 //			System.out.println(frame.getName());
 
-		VerbAtlasFrame vaf = va.getFrame("EAT_BITE");
-		for (BabelNetSynsetID babid : vaf)
-			System.out.println(vaf.toSynsetFrame(babid));
+//		VerbAtlasFrame vaf = va.getFrame("EAT_BITE");
+//		for (BabelNetSynsetID babid : vaf)
+//			System.out.println(vaf.toSynsetFrame(babid));
+
+//		HashSet<BabelNetSynsetID> hash = new HashSet<BabelNetSynsetID>();
+//		hash.add(new BabelNetSynsetID("bn:00015081n"));
+//		hash.add(new BabelNetSynsetID("bn:00015080n"));
+//		System.out.println(hash);
+
+//		HashMap<BabelNetSynsetID, VerbAtlasSynsetFrame> synsets = new HashMap<BabelNetSynsetID, VerbAtlasSynsetFrame>();
+//		Set<BabelNetSynsetID> babelSynsetIds = synsets.keySet();
+//		
+//		synsets.put(new BabelNetSynsetID("bn:00015080n"), null);
+//		babelSynsetIds.add(new BabelNetSynsetID("bn:10015080n"));
+//		
+//		System.out.println(synsets);
+
+		final double start = System.nanoTime();
+
+		VerbAtlasFrame frame = va.getFrame("EAT_BITE");
+
+		for (int i = 0; i < 100; i++)
+			for (BabelNetSynsetID synsetId : frame)
+				System.out.println(frame.toSynsetFrame(synsetId));
+
+		final double end = System.nanoTime();
+
+		System.out.println("Tempo trascorso: " + (end - start));
 	}
 }
