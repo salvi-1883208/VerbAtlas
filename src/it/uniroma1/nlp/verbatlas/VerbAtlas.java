@@ -34,7 +34,7 @@ import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 public class VerbAtlas implements Iterable<VerbAtlasFrame>
 {
 	private static VerbAtlas instance;
-	private VerbAtlasVersion version;
+	private VerbAtlasVersion version = new VerbAtlasVersion();
 	private HashSet<VerbAtlasFrame> frames;
 
 	// Costruttore privato necessario per il pattern del singoletto

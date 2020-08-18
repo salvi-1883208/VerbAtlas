@@ -1,10 +1,15 @@
 package it.uniroma1.nlp;
 
 import java.io.File;
-
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,16 +74,18 @@ public class Main
 //		
 //		System.out.println(synsets);
 
-		final double start = System.nanoTime();
-
-		VerbAtlasFrame frame = va.getFrame("EAT_BITE");
-
-		for (int i = 0; i < 100; i++)
-			for (BabelNetSynsetID synsetId : frame)
-				System.out.println(frame.toSynsetFrame(synsetId));
-
-		final double end = System.nanoTime();
-
-		System.out.println("Tempo trascorso: " + (end - start));
+//		final double start = System.nanoTime();
+//
+//		VerbAtlasFrame frame = va.getFrame("EAT_BITE");
+//
+//		for (int i = 0; i < 100; i++)
+//			for (BabelNetSynsetID synsetId : frame)
+//				System.out.println(frame.toSynsetFrame(synsetId));
+//
+//		final double end = System.nanoTime();
+//
+//		System.out.println("Tempo trascorso: " + (end - start));
+		
+		System.out.println(va.getVersion());
 	}
 }
