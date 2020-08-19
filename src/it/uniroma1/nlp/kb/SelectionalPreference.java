@@ -3,6 +3,7 @@ package it.uniroma1.nlp.kb;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 
 public class SelectionalPreference implements Comparable<SelectionalPreference>
@@ -12,12 +13,13 @@ public class SelectionalPreference implements Comparable<SelectionalPreference>
 	private String preferenceName;
 	private BabelNetSynsetID babelId;
 
-	public SelectionalPreference(Role role, PreferenceID preferenceId) throws IOException, URISyntaxException
+	public SelectionalPreference(Role role, PreferenceID preferenceId)
+			throws IOException, URISyntaxException, MissingVerbAtlasResourceException
 	{
 		this.role = role;
 		this.preferenceId = preferenceId;
 
-		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_preference_ids.tsv"))
+		for (String line : TextLoader.loadTxt("VA_preference_ids.tsv"))
 			if (line.startsWith(preferenceId.getId()))
 			{
 				babelId = new BabelNetSynsetID(line.substring(line.indexOf("\t") + 1, line.lastIndexOf("\t")));

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import it.uniroma1.nlp.kb.exceptions.BabelNetSynsetIDToWordNetSynsetIDException;
+import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
 public class WordNetSynsetID extends ResourceID
 {
@@ -14,12 +15,11 @@ public class WordNetSynsetID extends ResourceID
 		super(id);
 	}
 
-	public BabelNetSynsetID toBabelID()
-			throws IOException, URISyntaxException, BabelNetSynsetIDToWordNetSynsetIDException
+	public BabelNetSynsetID toBabelID() throws IOException, URISyntaxException, VerbAtlasException
 	{
 		if (babelNetId == null)
 		{
-			for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/bn2wn.tsv"))
+			for (String line : TextLoader.loadTxt("bn2wn.tsv"))
 				if (line.endsWith(getId()))
 				{
 					babelNetId = new BabelNetSynsetID(line.substring(0, line.indexOf("\t")));

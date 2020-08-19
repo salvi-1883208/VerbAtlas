@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import it.uniroma1.nlp.kb.exceptions.PropBankPredicateIDToVerbAtlasIDException;
+import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
 public class VerbAtlasFrameID extends ResourceID
 {
@@ -15,11 +16,11 @@ public class VerbAtlasFrameID extends ResourceID
 	}
 
 	public PropBankPredicateID toPropBankID()
-			throws IOException, URISyntaxException, PropBankPredicateIDToVerbAtlasIDException
+			throws IOException, URISyntaxException, VerbAtlasException
 	{
 		if (propBankId == null)
 		{
-			for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/bn2wn.tsv"))
+			for (String line : TextLoader.loadTxt("bn2wn.tsv"))
 				if (line.substring(line.indexOf(">") + 1, line.indexOf("\t")).equals(getId()))
 				{
 					propBankId = new PropBankPredicateID(line.substring(0, line.indexOf(">")));

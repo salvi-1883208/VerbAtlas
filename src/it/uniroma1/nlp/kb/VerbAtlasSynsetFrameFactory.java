@@ -16,7 +16,7 @@ public class VerbAtlasSynsetFrameFactory
 	public VerbAtlasSynsetFrame buildSynsetFrame(BabelNetSynsetID id, VerbAtlasFrame frame, TreeSet<Role> roles)
 			throws VerbAtlasException, IOException, URISyntaxException
 	{
-		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_bn2sp.tsv"))
+		for (String line : TextLoader.loadTxt("VA_bn2sp.tsv"))
 			if (line.startsWith(id.getId()))
 			{
 				for (Role role : roles)
@@ -35,7 +35,7 @@ public class VerbAtlasSynsetFrameFactory
 					}
 				break;
 			}
-		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/wn2lemma.tsv"))
+		for (String line : TextLoader.loadTxt("wn2lemma.tsv"))
 			if (line.startsWith(id.toWordNetID().getId()))
 				return new VerbAtlasSynsetFrame(frame, id, roles, line.substring(line.indexOf("\t") + 1));
 		throw new WordNetIDToLemmaException("WordNetID '" + id.toWordNetID() + "' does not exist");

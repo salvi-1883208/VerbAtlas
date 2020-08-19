@@ -1,18 +1,12 @@
 package it.uniroma1.nlp.kb;
 
 import java.io.File;
+
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
+import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
 import it.uniroma1.nlp.kb.exceptions.ResourceDateException;
 
 public class VerbAtlasVersion
@@ -25,23 +19,18 @@ public class VerbAtlasVersion
 
 	public VerbAtlasVersion()
 	{
-		File file = new File("resources/");
-		String[] directories = file.list(new FilenameFilter()
+		try
 		{
-			@Override
-			public boolean accept(File current, String name)
-			{
-				return new File(current, name).isDirectory();
-			}
-		});
+			
+			version = TextLoader.readVerbAtlasVersion().replace('.', '_');
+			version = "V" + version.substring(version.indexOf("-") + 1);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			version = "The VerbAtlas resource folder can not be found";
+		}
 
-		for (String string : directories)
-			if (string.startsWith("VerbAtlas"))
-			{
-				version = "V" + string.substring(string.indexOf("-") + 1);
-				version = version.replace('.', '_');
-				break;
-			}
 	}
 
 	public LocalDate getReleaseDate() throws ResourceDateException
@@ -67,13 +56,12 @@ public class VerbAtlasVersion
 	{
 		try
 		{
-			return "VerbAtlas resource " + version + ". Released "
-					+ getReleaseDate().format(DateTimeFormatter.ISO_DATE);
+			return "VerbAtlas resource " + version + ". Released on "
+					+ getReleaseDate().format(DateTimeFormatter.ISO_DATE) + ".";
 		}
 		catch (ResourceDateException e)
 		{
-			e.printStackTrace();
-			return "VerbAtlas resource " + version + ". Released in unknown date";
+			return "VerbAtlas resource " + version + ". Released date unknown.";
 		}
 	}
 }

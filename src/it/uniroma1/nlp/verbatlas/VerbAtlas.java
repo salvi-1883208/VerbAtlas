@@ -25,6 +25,7 @@ import it.uniroma1.nlp.kb.VerbAtlasVersion;
 import it.uniroma1.nlp.kb.WordNetSynsetID;
 import it.uniroma1.nlp.kb.exceptions.FrameDoesNotExist;
 import it.uniroma1.nlp.kb.exceptions.IdToFrameException;
+import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
 import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
 /**
@@ -39,16 +40,16 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 	private HashSet<VerbAtlasFrame> frames;
 
 	// Costruttore privato necessario per il pattern del singoletto
-	private VerbAtlas() throws IOException, URISyntaxException
+	private VerbAtlas() throws IOException, URISyntaxException, MissingVerbAtlasResourceException
 	{
 		frames = new HashSet<VerbAtlasFrame>();
 
-		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_frame_ids.tsv"))
+		for (String line : TextLoader.loadTxt("VA_frame_ids.tsv"))
 			frames.add(new VerbAtlasFrame(line.substring(line.indexOf("\t") + 1),
 					new VerbAtlasFrameID(line.substring(0, line.indexOf("\t")))));
 	}
 
-	public static VerbAtlas getInstance() throws IOException, URISyntaxException
+	public static VerbAtlas getInstance() throws IOException, URISyntaxException, MissingVerbAtlasResourceException
 	{
 		if (instance == null)
 			instance = new VerbAtlas();
@@ -89,7 +90,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 	}
 
 	public HashSet<VerbAtlasFrame> getFramesByVerb(String verb)
-			throws VerbAtlasException, IOException, URISyntaxException
+			throws VerbAtlasException, IOException, URISyntaxException, MissingVerbAtlasResourceException
 	{
 		// cercare tutti i frame che contengono un verbo fornito in input,
 		// restituisce l'insieme dei frame che si riferiscono ai vari significati di
@@ -97,7 +98,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		// e contengono i synset corrispondenti. I sinonimi di ogni synset verbale sono
 		// nel file wn2lemma.tsv
 		HashSet<VerbAtlasFrame> frames = new HashSet<VerbAtlasFrame>();
-		for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/wn2lemma.tsv"))
+		for (String line : TextLoader.loadTxt("wn2lemma.tsv"))
 			if (line.endsWith(verb.toLowerCase()))
 				frames.add(toVerbAtlasFrame(
 						new WordNetSynsetID(line.substring(0, line.indexOf("\t"))).toBabelID().toVerbAtlasID()));
@@ -129,7 +130,8 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		private VerbAtlasSynsetFrameFactory synsetFactory = new VerbAtlasSynsetFrameFactory();
 
 		// Costruttore privato necessario
-		private VerbAtlasFrame(String name, VerbAtlasFrameID frameId) throws IOException, URISyntaxException
+		private VerbAtlasFrame(String name, VerbAtlasFrameID frameId)
+				throws IOException, URISyntaxException, MissingVerbAtlasResourceException
 		{
 			this(name, frameId, readSynsetIds(frameId), readRoles(frameId));
 		}
@@ -148,19 +150,20 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		}
 
 		private static HashSet<BabelNetSynsetID> readSynsetIds(VerbAtlasFrameID frameId)
-				throws IOException, URISyntaxException
+				throws IOException, URISyntaxException, MissingVerbAtlasResourceException
 		{
 			HashSet<BabelNetSynsetID> synsetIds = new HashSet<BabelNetSynsetID>();
-			for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_bn2va.tsv"))
+			for (String line : TextLoader.loadTxt("VA_bn2va.tsv"))
 				if (line.endsWith(frameId.getId()))
 					synsetIds.add(new BabelNetSynsetID(line.substring(0, line.indexOf("\t")).strip()));
 			return synsetIds;
 		}
 
-		private static TreeSet<Role> readRoles(VerbAtlasFrameID frameId) throws IOException, URISyntaxException
+		private static TreeSet<Role> readRoles(VerbAtlasFrameID frameId)
+				throws IOException, URISyntaxException, MissingVerbAtlasResourceException
 		{
 			TreeSet<Role> roles = new TreeSet<Role>();
-			for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/VA_va2pas.tsv"))
+			for (String line : TextLoader.loadTxt("VA_va2pas.tsv"))
 				if (line.startsWith(frameId.getId()))
 				{
 					for (String role : line.substring(line.indexOf("\t") + 1).split("\t"))

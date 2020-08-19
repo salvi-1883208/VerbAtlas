@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import it.uniroma1.nlp.kb.exceptions.PropBankPredicateIDToVerbAtlasIDException;
+import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
 public class PropBankPredicateID extends ResourceID
 {
@@ -15,12 +16,11 @@ public class PropBankPredicateID extends ResourceID
 	}
 
 	// metodo per convertire da propbank a verbatlas (pb2va.tsv)
-	public VerbAtlasFrameID toVerbAtlasID()
-			throws IOException, URISyntaxException, PropBankPredicateIDToVerbAtlasIDException
+	public VerbAtlasFrameID toVerbAtlasID() throws IOException, URISyntaxException, VerbAtlasException
 	{
 		if (verbAtlasId == null)
 		{
-			for (String line : TextLoader.loadTxt("Verbatlas-1.0.3/pb2va.tsv"))
+			for (String line : TextLoader.loadTxt("pb2va.tsv"))
 				if (line.startsWith(getId()))
 				{
 					verbAtlasId = new VerbAtlasFrameID(line.substring(line.indexOf(">") + 1, line.indexOf("\t")));
