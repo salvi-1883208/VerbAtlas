@@ -54,9 +54,11 @@ public class VerbAtlasSynsetFrame implements Frame
 	{
 		List<String> strings = new ArrayList<String>();
 		for (Role role : roles)
-			strings.add(role.toString());
-		return "\t\t\t\tFrame: " + frame.getName() + "\t\tSynset: " + name + "\nBabelNetSynsetID: " + synsetId
-				+ "\nVerbAtlas Frame ID: " + frame.getId().getId() + "\nRoles: \n\t" + String.join(",\n\t", strings);
+			if (role.toString() != "")
+				strings.add(role.toString());
+		return "\t\t\t\tFrame: " + frame.getName() + "\t\tSynset: " + name + "\nVerbAtlas Frame ID: "
+				+ frame.getId().getId() + "\nBabelNetSynsetID: " + synsetId + "\nRoles: \n\t"
+				+ String.join(",\n\t", strings);
 	}
 
 }

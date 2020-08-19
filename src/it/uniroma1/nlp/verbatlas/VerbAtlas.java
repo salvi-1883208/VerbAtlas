@@ -15,9 +15,12 @@ import java.util.TreeSet;
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame;
 import it.uniroma1.nlp.kb.BabelNetSynsetID;
 import it.uniroma1.nlp.kb.Frame;
+import it.uniroma1.nlp.kb.ImplicitArgument;
 import it.uniroma1.nlp.kb.PropBankPredicateID;
 import it.uniroma1.nlp.kb.ResourceID;
+import it.uniroma1.nlp.kb.RolePreference;
 import it.uniroma1.nlp.kb.SelectionalPreference;
+import it.uniroma1.nlp.kb.ShadowArgument;
 import it.uniroma1.nlp.kb.TextLoader;
 import it.uniroma1.nlp.kb.VerbAtlasFrameID;
 import it.uniroma1.nlp.kb.VerbAtlasSynsetFrameFactory;
@@ -239,7 +242,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			List<String> roles = new ArrayList<String>();
 			List<String> ids = new ArrayList<String>();
 			for (Role role : this.roles)
-				roles.add(role.toString());
+					roles.add(role.getType().toUpperCase());
 			for (BabelNetSynsetID babelId : babelSynsetIds)
 				ids.add(babelId.getId());
 
@@ -278,19 +281,27 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 
 		public static class Role implements Comparable<Role>
 		{
-//			private VerbAtlasFrameID frameId;
 			private Type type;
-			private TreeSet<SelectionalPreference> sp = new TreeSet<SelectionalPreference>();
+			private TreeSet<RolePreference> rp = new TreeSet<RolePreference>();
 
-			public Role(String type /* , VerbAtlasFrameID frameId */)
+			public Role(String type)
 			{
 				this.type = Type.valueOf(type.replace('-', '_').toUpperCase());
-//				this.frameId = frameId;
 			}
 
 			public void addSelectionalPreference(SelectionalPreference sp)
 			{
-				this.sp.add(sp);
+				this.rp.add(sp);
+			}
+
+			public void addImplicitArgument(ImplicitArgument impArg)
+			{
+				this.rp.add(impArg);
+			}
+
+			public void addShadowArgument(ShadowArgument shadArg)
+			{
+				this.rp.add(shadArg);
 			}
 
 			public HashSet<BabelNetSynsetID> getImplicitArguments()
@@ -313,9 +324,9 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				return role;
 			}
 
-			public TreeSet<SelectionalPreference> getSelectionalPreferences()
+			public TreeSet<RolePreference> getSelectionalPreferences()
 			{
-				return sp;
+				return rp;
 			}
 
 			@Override
@@ -333,22 +344,24 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 					return false;
 
 				Role role = (Role) o;
-				return role.getSelectionalPreferences().equals(this.sp) && role.getType().equals(getType());
+				return role.getSelectionalPreferences().equals(this.rp) && role.getType().equals(getType());
 			}
 
 			@Override
 			public int hashCode()
 			{
-				return Objects.hash(sp, type);
+				return Objects.hash(rp, type);
 			}
 
 			@Override
 			public String toString()
 			{
+				if (rp.isEmpty())
+					return "";
 				List<String> strings = new ArrayList<String>();
-				for (SelectionalPreference sel : sp)
+				for (RolePreference sel : rp)
 					strings.add(sel.toString());
-				return "Type: " + type.toString() + " --> [" + String.join(", ", strings) + "]";
+				return type.toString() + " --> [" + String.join(", ", strings) + "]";
 			}
 
 			enum Type

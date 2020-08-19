@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
-import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 
-public class SelectionalPreference extends RolePreference
+public class ImplicitArgument extends RolePreference
 {
-	public SelectionalPreference(PreferenceID preferenceId)
+	public ImplicitArgument(BabelNetSynsetID babelId)
 			throws MissingVerbAtlasResourceException, IOException, URISyntaxException
 	{
-		super(preferenceId);
+		super(babelId);
 	}
 }

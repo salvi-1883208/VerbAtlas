@@ -16,6 +16,7 @@ public class VerbAtlasSynsetFrameFactory
 	public VerbAtlasSynsetFrame buildSynsetFrame(BabelNetSynsetID id, VerbAtlasFrame frame, TreeSet<Role> roles)
 			throws VerbAtlasException, IOException, URISyntaxException
 	{
+		// Selectional Preferences
 		for (String line : TextLoader.loadTxt("VA_bn2sp.tsv"))
 			if (line.startsWith(id.getId()))
 			{
@@ -31,10 +32,36 @@ public class VerbAtlasSynsetFrameFactory
 						else
 							strRoles = line.substring(start, end);
 						for (String strId : strRoles.split("\\|"))
-							role.addSelectionalPreference(new SelectionalPreference(role, new PreferenceID(strId)));
+							role.addSelectionalPreference(new SelectionalPreference(new PreferenceID(strId)));
 					}
 				break;
 			}
+
+		// Implicit Arguments
+		for (String line : TextLoader.loadTxt("VA_bn2implicit.tsv"))
+			if (line.startsWith(id.getId()))
+			{
+				for (Role role : roles)
+					if (line.contains(role.getType()))
+					{
+						int start = line.indexOf(role.getType()) + role.getType().length() + 1;
+						int end = line.substring(line.indexOf(role.getType()) + role.getType().length() + 1)
+								.indexOf("\t") + line.indexOf(role.getType()) + role.getType().length() + 1;
+						String strImplicit = "";
+						if (end < start)
+							strImplicit = line.substring(start);
+						else
+							strImplicit = line.substring(start, end);
+						for (String strId : strImplicit.split("\\|"))
+							for (String line_ : TextLoader.loadTxt("VA_preference_ids.tsv"))
+								if (line_.contains(strId))
+									role.addImplicitArgument(new ImplicitArgument(
+											new BabelNetSynsetID(line_.substring(line_.lastIndexOf("\t")))));
+					}
+			}
+		
+		//TODO Shadow Arguments
+
 		for (String line : TextLoader.loadTxt("wn2lemma.tsv"))
 			if (line.startsWith(id.toWordNetID().getId()))
 				return new VerbAtlasSynsetFrame(frame, id, roles, line.substring(line.indexOf("\t") + 1));
