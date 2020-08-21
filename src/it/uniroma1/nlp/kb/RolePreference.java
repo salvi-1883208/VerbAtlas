@@ -1,9 +1,11 @@
 package it.uniroma1.nlp.kb;
 
 import java.io.IOException;
+
 import java.net.URISyntaxException;
 
-import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
+import it.uniroma1.nlp.kb.exceptions.ResourceIDToRoleException;
+import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
 public abstract class RolePreference implements Comparable<RolePreference>
 {
@@ -11,32 +13,38 @@ public abstract class RolePreference implements Comparable<RolePreference>
 	private String preferenceName;
 	private BabelNetSynsetID babelId;
 
-	public RolePreference(PreferenceID preferenceId)
-			throws MissingVerbAtlasResourceException, IOException, URISyntaxException
+	// Si possono dare in input solamente BabelNetSynsetID o PreferenceID
+	private RolePreference(ResourceID id) throws VerbAtlasException, IOException, URISyntaxException
 	{
-		this.preferenceId = preferenceId;
+		// Questo if è inutile, ma lo lascio per sicurezza
+		if (!(id instanceof BabelNetSynsetID) && !(id instanceof PreferenceID))
+			throw new ResourceIDToRoleException("Cannot convert from id '" + id + "' to a role");
+
+		if (id instanceof BabelNetSynsetID)
+			babelId = (BabelNetSynsetID) id;
+		else
+			preferenceId = (PreferenceID) id;
 
 		for (String line : TextLoader.loadTxt("VA_preference_ids.tsv"))
-			if (line.startsWith(preferenceId.getId()))
+			if (line.contains(id.getId()))
 			{
-				babelId = new BabelNetSynsetID(line.substring(line.indexOf("\t") + 1, line.lastIndexOf("\t")));
+				if (id instanceof PreferenceID)
+					babelId = new BabelNetSynsetID(line.substring(line.indexOf("\t") + 1, line.lastIndexOf("\t")));
+				else
+					preferenceId = new PreferenceID(line.substring(0, line.indexOf("\t")));
 				preferenceName = line.substring(line.lastIndexOf("\t") + 1);
 				break;
 			}
 	}
 
-	public RolePreference(BabelNetSynsetID babelId)
-			throws MissingVerbAtlasResourceException, IOException, URISyntaxException
+	public RolePreference(BabelNetSynsetID id) throws VerbAtlasException, IOException, URISyntaxException
 	{
-		this.babelId = babelId;
+		this((ResourceID) id);
+	}
 
-		for (String line : TextLoader.loadTxt("VA_preference_ids.tsv"))
-			if (line.contains(babelId.getId()))
-			{
-				preferenceId = new PreferenceID(line.substring(0, line.indexOf("\t")));
-				preferenceName = line.substring(line.lastIndexOf("\t") + 1);
-				break;
-			}
+	public RolePreference(PreferenceID id) throws VerbAtlasException, IOException, URISyntaxException
+	{
+		this((ResourceID) id);
 	}
 
 	public PreferenceID getId()

@@ -1,14 +1,14 @@
 package it.uniroma1.nlp.kb;
 
 import java.io.IOException;
+
 import java.net.URISyntaxException;
 
-import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
+import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
 public class ImplicitArgument extends RolePreference
 {
-	public ImplicitArgument(BabelNetSynsetID babelId)
-			throws MissingVerbAtlasResourceException, IOException, URISyntaxException
+	public ImplicitArgument(BabelNetSynsetID babelId) throws IOException, URISyntaxException, VerbAtlasException
 	{
 		super(babelId);
 	}
