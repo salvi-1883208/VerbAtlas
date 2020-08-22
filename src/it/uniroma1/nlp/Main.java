@@ -26,11 +26,13 @@ import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
 import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 import it.uniroma1.nlp.verbatlas.VerbAtlas;
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame;
+import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 import it.uniroma1.nlp.verbatlas.VerbAtlasSynsetFrame;
 
 public class Main
 {
-	public static void main(String[] args) throws IOException, URISyntaxException, VerbAtlasException, MissingVerbAtlasResourceException
+	public static void main(String[] args)
+			throws IOException, URISyntaxException, VerbAtlasException, MissingVerbAtlasResourceException
 	{
 
 		VerbAtlas va = VerbAtlas.getInstance();
@@ -47,13 +49,13 @@ public class Main
 //			}
 //		System.out.println("FINITO");
 
-//		System.out.println(va.getFrame(new WordNetSynsetID("wn:01168468v")));
+		System.out.println(va.getFrame(new WordNetSynsetID("wn:01168468v")));
 		System.out.println(va.getFrame(new BabelNetSynsetID("bn:00082388v")));
-//		System.out.println(va.getFrame(new VerbAtlasFrameID("va:0463f")));
-//		System.out.println(va.getFrame(new PropBankPredicateID("abet.01")));
-//		System.out.println(va.getFrame("EAT_BITE"));
-//		for(VerbAtlasFrame frame : va.getFramesByVerb("hit"))
-//			System.out.println(frame);
+		System.out.println(va.getFrame(new VerbAtlasFrameID("va:0463f")));
+		System.out.println(va.getFrame(new PropBankPredicateID("abet.01")));
+		System.out.println(va.getFrame("EAT_BITE"));
+		for(VerbAtlasFrame frame : va.getFramesByVerb("hit"))
+			System.out.println(frame);
 
 //		for (VerbAtlasFrame frame : va.getFramesByVerb("eat"))
 //			System.out.println(frame.getName());
@@ -86,7 +88,13 @@ public class Main
 //		final double end = System.nanoTime();
 //
 //		System.out.println("Tempo trascorso: " + (end - start));
-		
+
 //		System.out.println(va.getVersion());
+
+//		for (Role role : va.getFrame(new BabelNetSynsetID("bn:00082388v")).getRoles())
+//		{
+//			System.out.println("Role Name: " + role.getType() + "\n\tImplicit Arguments: " + role.getImplicitArguments()
+//					+ "\n\tShadow Arguments: " + role.getShadowArguments() + "\n");
+//		}
 	}
 }

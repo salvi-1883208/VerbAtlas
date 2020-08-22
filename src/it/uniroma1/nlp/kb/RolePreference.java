@@ -10,7 +10,7 @@ import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 public abstract class RolePreference implements Comparable<RolePreference>
 {
 	private PreferenceID preferenceId;
-	private String preferenceName;
+	private String preferenceName = "";
 	private BabelNetSynsetID babelId;
 
 	// Si possono dare in input solamente BabelNetSynsetID o PreferenceID
@@ -77,18 +77,21 @@ public abstract class RolePreference implements Comparable<RolePreference>
 			return false;
 
 		RolePreference rp = (RolePreference) o;
-		return rp.getId().equals(preferenceId);
+		return rp.getBabelSynsetId().equals(babelId);
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return preferenceId.hashCode();
+		return babelId.hashCode();
 	}
 
 	@Override
 	public String toString()
 	{
-		return preferenceName;
+		if (preferenceName != "")
+			return preferenceName;
+		else
+			return babelId.toString();
 	}
 }

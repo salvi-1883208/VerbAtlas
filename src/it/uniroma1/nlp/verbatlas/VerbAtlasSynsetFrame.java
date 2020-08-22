@@ -3,6 +3,7 @@ package it.uniroma1.nlp.verbatlas;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import it.uniroma1.nlp.kb.BabelNetSynsetID;
 import it.uniroma1.nlp.kb.Frame;
@@ -52,13 +53,9 @@ public class VerbAtlasSynsetFrame implements Frame
 	@Override
 	public String toString()
 	{
-		List<String> strings = new ArrayList<String>();
-		for (Role role : roles)
-			if (role.toString() != "")
-				strings.add(role.toString());
 		return "\t\t\t\tFrame: " + frame.getName() + "\t\tSynset: " + name + "\nVerbAtlas Frame ID: "
-				+ frame.getId().getId() + "\nBabelNetSynsetID: " + synsetId + "\nRoles: \n\t"
-				+ String.join(",\n\t", strings);
+				+ frame.getId().getId() + "\nBabelNetSynsetID: " + synsetId + "\nRoles: \n\t" + String.join(",\n\t",
+						roles.stream().map(x -> x.toString() != "" ? x.toString() : "").collect(Collectors.toList()));
 	}
 
 }

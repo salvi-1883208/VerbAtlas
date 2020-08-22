@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame;
+import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 import it.uniroma1.nlp.kb.BabelNetSynsetID;
 import it.uniroma1.nlp.kb.Frame;
 import it.uniroma1.nlp.kb.ImplicitArgument;
@@ -29,6 +31,7 @@ import it.uniroma1.nlp.kb.WordNetSynsetID;
 import it.uniroma1.nlp.kb.exceptions.FrameDoesNotExist;
 import it.uniroma1.nlp.kb.exceptions.IdToFrameException;
 import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
+import it.uniroma1.nlp.kb.exceptions.RoleNotFocalizedOnSynsetException;
 import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
 /**
@@ -171,7 +174,7 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				{
 					for (String role : line.substring(line.indexOf("\t") + 1).split("\t"))
 						if (!role.isEmpty())
-							roles.add(new Role(role /* , frameId */));
+							roles.add(new Role(role));
 					break;
 				}
 			return roles;
@@ -239,15 +242,11 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		@Override
 		public String toString()
 		{
-			List<String> roles = new ArrayList<String>();
-			List<String> ids = new ArrayList<String>();
-			for (Role role : this.roles)
-					roles.add(role.getType().toUpperCase());
-			for (BabelNetSynsetID babelId : babelSynsetIds)
-				ids.add(babelId.getId());
-
 			return "Frame Name: " + name + "	Frame ID: " + frameId.getId() + "\n" + "Roles: \n\t"
-					+ String.join(",\n\t", roles) + "\n" + "BabelNet Synset IDs: \n\t" + String.join(", ", ids) + "\n";
+					+ String.join(",\n\t", roles.stream().map(x -> x.toString()).collect(Collectors.toList()))
+					+ "\nBabelNet Synset IDs: \n\t"
+					+ String.join(", ", babelSynsetIds.stream().map(x -> x.toString()).collect(Collectors.toList()))
+					+ "\n";
 		}
 
 		public static class Builder
@@ -282,7 +281,9 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		public static class Role implements Comparable<Role>
 		{
 			private Type type;
-			private TreeSet<RolePreference> rp = new TreeSet<RolePreference>();
+			private TreeSet<SelectionalPreference> sp = new TreeSet<SelectionalPreference>();
+			private HashSet<ImplicitArgument> implicitArguments = new HashSet<ImplicitArgument>();
+			private HashSet<ShadowArgument> shadowArguments = new HashSet<ShadowArgument>();
 
 			public Role(String type)
 			{
@@ -291,29 +292,29 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 
 			public void addSelectionalPreference(SelectionalPreference sp)
 			{
-				this.rp.add(sp);
+				this.sp.add(sp);
 			}
 
-			public void addImplicitArgument(ImplicitArgument impArg)
+			public void addImplicitArgument(ImplicitArgument impArg) throws RoleNotFocalizedOnSynsetException
 			{
-				this.rp.add(impArg);
+				this.implicitArguments.add(impArg);
 			}
 
-			public void addShadowArgument(ShadowArgument shadArg)
+			public void addShadowArgument(ShadowArgument shadArg) throws RoleNotFocalizedOnSynsetException
 			{
-				this.rp.add(shadArg);
+				this.shadowArguments.add(shadArg);
 			}
 
 			public HashSet<BabelNetSynsetID> getImplicitArguments()
 			{
-				// TODO
-				return null;
+				return implicitArguments.stream().map(x -> x.getBabelSynsetId())
+						.collect(Collectors.toCollection(HashSet::new));
 			}
 
 			public HashSet<BabelNetSynsetID> getShadowArguments()
 			{
-				// TODO
-				return null;
+				return shadowArguments.stream().map(x -> x.getBabelSynsetId())
+						.collect(Collectors.toCollection(HashSet::new));
 			}
 
 			public String getType()
@@ -324,9 +325,9 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				return role;
 			}
 
-			public TreeSet<RolePreference> getSelectionalPreferences()
+			public TreeSet<SelectionalPreference> getSelectionalPreferences()
 			{
-				return rp;
+				return sp;
 			}
 
 			@Override
@@ -344,24 +345,24 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 					return false;
 
 				Role role = (Role) o;
-				return role.getSelectionalPreferences().equals(this.rp) && role.getType().equals(getType());
+				return role.getSelectionalPreferences().equals(this.sp) && role.getType().equals(getType())
+						&& role.getImplicitArguments().equals(implicitArguments)
+						&& role.getShadowArguments().equals(shadowArguments);
 			}
 
 			@Override
 			public int hashCode()
 			{
-				return Objects.hash(rp, type);
+				return Objects.hash(sp, type);
 			}
 
 			@Override
 			public String toString()
 			{
-				if (rp.isEmpty())
-					return "";
-				List<String> strings = new ArrayList<String>();
-				for (RolePreference sel : rp)
-					strings.add(sel.toString());
-				return type.toString() + " --> [" + String.join(", ", strings) + "]";
+				if (sp.isEmpty())
+					return this.getType().toUpperCase();
+				return type.toString() + " --> ["
+						+ String.join(", ", sp.stream().map(x -> x.toString()).collect(Collectors.toList())) + "]";
 			}
 
 			enum Type
