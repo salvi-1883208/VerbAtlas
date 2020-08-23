@@ -50,7 +50,7 @@ public class Main
 //		System.out.println("FINITO");
 
 		System.out.println(va.getFrame(new WordNetSynsetID("wn:01168468v")));
-		System.out.println(va.getFrame(new BabelNetSynsetID("bn:00082388v")));
+		System.out.println(va.getFrame(new BabelNetSynsetID("bn:00083035v")));
 		System.out.println(va.getFrame(new VerbAtlasFrameID("va:0463f")));
 		System.out.println(va.getFrame(new PropBankPredicateID("abet.01")));
 		System.out.println(va.getFrame("EAT_BITE"));

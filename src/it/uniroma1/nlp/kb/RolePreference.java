@@ -91,7 +91,6 @@ public abstract class RolePreference implements Comparable<RolePreference>
 	{
 		if (preferenceName != "")
 			return preferenceName;
-		else
-			return babelId.toString();
+		return babelId.toString();
 	}
 }

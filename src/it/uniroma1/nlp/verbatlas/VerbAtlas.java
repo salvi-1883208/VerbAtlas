@@ -242,8 +242,9 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		@Override
 		public String toString()
 		{
-			return "Frame Name: " + name + "	Frame ID: " + frameId.getId() + "\n" + "Roles: \n\t"
-					+ String.join(",\n\t", roles.stream().map(x -> x.toString()).collect(Collectors.toList()))
+			return "\t\t\tFrame Name: " + name + "	Frame ID: " + frameId.getId() + "\n" + "Roles: \n\t"
+					+ String.join(",\n\t",
+							roles.stream().map(x -> x.getType().toUpperCase()).collect(Collectors.toList()))
 					+ "\nBabelNet Synset IDs: \n\t"
 					+ String.join(", ", babelSynsetIds.stream().map(x -> x.toString()).collect(Collectors.toList()))
 					+ "\n";
@@ -360,9 +361,18 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			public String toString()
 			{
 				if (sp.isEmpty())
-					return this.getType().toUpperCase();
-				return type.toString() + " --> ["
-						+ String.join(", ", sp.stream().map(x -> x.toString()).collect(Collectors.toList())) + "]";
+					return "";
+				String s = type.toString() + " --> ["
+						+ String.join(", ", sp.stream().map(x -> x.toString()).collect(Collectors.toList()));
+				String s1 = String.join(", ",
+						implicitArguments.stream().map(x -> x.toString()).collect(Collectors.toList()));
+				String s2 = String.join(", ",
+						shadowArguments.stream().map(x -> x.toString()).collect(Collectors.toList()));
+				if (!s1.isEmpty())
+					s += ", " + s1;
+				if (!s2.isEmpty())
+					s += ", " + s2;
+				return s + " ]";
 			}
 
 			enum Type
