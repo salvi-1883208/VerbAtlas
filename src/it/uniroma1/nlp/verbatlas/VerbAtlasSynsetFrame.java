@@ -1,7 +1,5 @@
 package it.uniroma1.nlp.verbatlas;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 

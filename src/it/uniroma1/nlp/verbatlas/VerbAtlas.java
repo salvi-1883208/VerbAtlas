@@ -111,9 +111,6 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		return frames;
 	}
 
-	// TODO getSynsetByVerb, stessa cosa di get Frames By Verb ma restituisce i
-	// synset che contengono il verbo, non i frame
-
 	public VerbAtlasVersion getVersion()
 	{
 		return version;
@@ -150,7 +147,6 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			this.frameId = frameId;
 			this.roles = roles;
 
-			// TODO usare stream?
 			for (BabelNetSynsetID synsetId : babelSynsetIds)
 				synsets.put(synsetId, null);
 		}
