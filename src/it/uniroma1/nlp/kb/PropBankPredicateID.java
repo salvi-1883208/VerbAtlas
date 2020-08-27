@@ -6,16 +6,33 @@ import java.net.URISyntaxException;
 import it.uniroma1.nlp.kb.exceptions.PropBankPredicateIDToVerbAtlasIDException;
 import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
+/**
+ * Classe che rappresenta un PropBankPredicateID.
+ * 
+ * @author Salvi Marco
+ */
 public class PropBankPredicateID extends ResourceID
 {
 	private VerbAtlasFrameID verbAtlasId;
 
+	/**
+	 * Costruttore della classe.
+	 * 
+	 * @param String id
+	 */
 	public PropBankPredicateID(String id)
 	{
 		super(id);
 	}
 
-	// metodo per convertire da propbank a verbatlas (pb2va.tsv)
+	/**
+	 * Restituisce il VerbAtlasFrameID associato al PropBankPredicateID
+	 * 
+	 * @return VerbAtlasFrameID associato al PropBankPredicateID
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws VerbAtlasException
+	 */
 	public VerbAtlasFrameID toVerbAtlasID() throws IOException, URISyntaxException, VerbAtlasException
 	{
 		if (verbAtlasId == null)

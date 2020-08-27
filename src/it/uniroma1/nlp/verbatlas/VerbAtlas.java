@@ -3,24 +3,20 @@ package it.uniroma1.nlp.verbatlas;
 import java.io.IOException;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame;
-import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 import it.uniroma1.nlp.kb.BabelNetSynsetID;
 import it.uniroma1.nlp.kb.Frame;
 import it.uniroma1.nlp.kb.ImplicitArgument;
 import it.uniroma1.nlp.kb.PropBankPredicateID;
 import it.uniroma1.nlp.kb.ResourceID;
-import it.uniroma1.nlp.kb.RolePreference;
 import it.uniroma1.nlp.kb.SelectionalPreference;
 import it.uniroma1.nlp.kb.ShadowArgument;
 import it.uniroma1.nlp.kb.TextLoader;
@@ -28,16 +24,18 @@ import it.uniroma1.nlp.kb.VerbAtlasFrameID;
 import it.uniroma1.nlp.kb.VerbAtlasSynsetFrameFactory;
 import it.uniroma1.nlp.kb.VerbAtlasVersion;
 import it.uniroma1.nlp.kb.WordNetSynsetID;
-import it.uniroma1.nlp.kb.exceptions.FrameDoesNotExist;
+import it.uniroma1.nlp.kb.exceptions.FrameDoesNotExistException;
 import it.uniroma1.nlp.kb.exceptions.IdToFrameException;
 import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
-import it.uniroma1.nlp.kb.exceptions.RoleNotFocalizedOnSynsetException;
 import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
 /**
+ * Classe che contiene tutti i frame riportati nella risorsa VerbAtlas. Non può
+ * essere istanziata singolarmente, per ottenere un'istanza usare il metodo
+ * VerbAtlas.getInstance(). Non può essere presente più di una istanza della
+ * classe.
  * 
- * @author Marco Salvi Classe principale del progetto VerbAtlas
- *
+ * @author Salvi Marco
  */
 public class VerbAtlas implements Iterable<VerbAtlasFrame>
 {
@@ -55,6 +53,14 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 					new VerbAtlasFrameID(line.substring(0, line.indexOf("\t")))));
 	}
 
+	/**
+	 * Metodo per ottenere un'istanza di VerbAtlas.
+	 * 
+	 * @return Istanza di VerbAtlas
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MissingVerbAtlasResourceException
+	 */
 	public static VerbAtlas getInstance() throws IOException, URISyntaxException, MissingVerbAtlasResourceException
 	{
 		if (instance == null)
@@ -62,14 +68,33 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		return instance;
 	}
 
-	public VerbAtlasFrame getFrame(String name) throws FrameDoesNotExist
+	/**
+	 * Metodo per ottenere un VerbAtlasFrame il quale nome corrisponde alla stringa
+	 * fornita in input. Lancia FrameDoesNotExistException se non esiste nessun
+	 * frame chiamato come la stringa fornita in input.
+	 * 
+	 * @param name del frame da restituire
+	 * @return VerbAtlasFrame
+	 * @throws FrameDoesNotExistException
+	 */
+	public VerbAtlasFrame getFrame(String name) throws FrameDoesNotExistException
 	{
 		for (VerbAtlasFrame frame : frames)
 			if (frame.getName().equals(name))
 				return frame;
-		throw new FrameDoesNotExist("Frame " + name + " does not exist");
+		throw new FrameDoesNotExistException("Frame " + name + " does not exist");
 	}
 
+	/**
+	 * Metodo per ottenere un VerbAtlasFrame o VerbAtlasSynsetFrame fornendo in
+	 * input l'ID del Frame o Synset che si vuole ottenere.
+	 * 
+	 * @param id del frame da restituire
+	 * @return VerbAtlasFrame oppure VerbAtlasSynsetFrame
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws VerbAtlasException
+	 */
 	public Frame getFrame(ResourceID id) throws IOException, URISyntaxException, VerbAtlasException
 	{
 		if (id instanceof VerbAtlasFrameID)
@@ -95,14 +120,21 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		throw new IdToFrameException("ID '" + id.getId() + "' does not exist");
 	}
 
+	/**
+	 * Metodo per ottenere l'insieme dei frame che si riferiscono ai vari
+	 * significati del verbo fornito in input come stringa.
+	 * 
+	 * @param verbo da cercare nei frame
+	 * @return HashSet<VerbAtlasFrame> dei frame che si riferiscono ai vari
+	 *         significati di verb
+	 * @throws VerbAtlasException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MissingVerbAtlasResourceException
+	 */
 	public HashSet<VerbAtlasFrame> getFramesByVerb(String verb)
 			throws VerbAtlasException, IOException, URISyntaxException, MissingVerbAtlasResourceException
 	{
-		// cercare tutti i frame che contengono un verbo fornito in input,
-		// restituisce l'insieme dei frame che si riferiscono ai vari significati di
-		// "run"
-		// e contengono i synset corrispondenti. I sinonimi di ogni synset verbale sono
-		// nel file wn2lemma.tsv
 		HashSet<VerbAtlasFrame> frames = new HashSet<VerbAtlasFrame>();
 		for (String line : TextLoader.loadTxt("wn2lemma.tsv"))
 			if (line.endsWith(verb.toLowerCase()))
@@ -111,6 +143,12 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		return frames;
 	}
 
+	/**
+	 * Restituisce un'istanza di VerbAtlasVersion che rappresenta la versione della
+	 * risorsa VerbAtlas.
+	 * 
+	 * @return un'istanza di VerbAtlasVersion
+	 */
 	public VerbAtlasVersion getVersion()
 	{
 		return version;
@@ -122,6 +160,13 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		return frames.iterator();
 	}
 
+	/**
+	 * Classe che rappresenta un Frame contenuto nella risorsa VerbAtlas. Un Frame
+	 * contiene: un nome, un insieme di tutti i BabelSynsetID associati a quel
+	 * frame, un VerbAtlasFrameID e una sequenza ordinata dei ruoli del frame.
+	 * 
+	 * @author Salvi Marco
+	 */
 	public static class VerbAtlasFrame implements Frame, Iterable<BabelNetSynsetID>
 	{
 		private String name;
@@ -132,14 +177,12 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 		private TreeSet<Role> roles;
 		private VerbAtlasSynsetFrameFactory synsetFactory = new VerbAtlasSynsetFrameFactory();
 
-		// Costruttore privato necessario
 		private VerbAtlasFrame(String name, VerbAtlasFrameID frameId)
 				throws IOException, URISyntaxException, MissingVerbAtlasResourceException
 		{
 			this(name, frameId, readSynsetIds(frameId), readRoles(frameId));
 		}
 
-		// Costruttore usato dal builder per specificare gli id e i ruoli
 		private VerbAtlasFrame(String name, VerbAtlasFrameID frameId, HashSet<BabelNetSynsetID> babelSynsetIds,
 				TreeSet<Role> roles)
 		{
@@ -176,6 +219,16 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			return roles;
 		}
 
+		/**
+		 * "Focalizza" un VerbAtlasFrame in un VerbAtlasSynsetFrame fornendo in input il
+		 * BabelNetSynsetID del Synset.
+		 * 
+		 * @param BabelNetSynsetID id del VerbAtlasSynsetFrame
+		 * @return VerbAtlasSynsetFrame
+		 * @throws IOException
+		 * @throws URISyntaxException
+		 * @throws VerbAtlasException
+		 */
 		public VerbAtlasSynsetFrame toSynsetFrame(BabelNetSynsetID id)
 				throws IOException, URISyntaxException, VerbAtlasException
 		{
@@ -187,6 +240,16 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			return synsets.get(id);
 		}
 
+		/**
+		 * "Focalizza" un VerbAtlasFrame in un VerbAtlasSynsetFrame fornendo in input il
+		 * BabelNetSynsetID del Synset.
+		 * 
+		 * @param WordNetSynsetID id del VerbAtlasSynsetFrame
+		 * @return VerbAtlasSynsetFrame
+		 * @throws IOException
+		 * @throws URISyntaxException
+		 * @throws VerbAtlasException
+		 */
 		public VerbAtlasSynsetFrame toSynsetFrame(WordNetSynsetID id)
 				throws IOException, URISyntaxException, VerbAtlasException
 		{
@@ -246,6 +309,12 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 					+ "\n";
 		}
 
+		/**
+		 * Builder di VerbAtlasFrame. Permette di costruire un Frame specificando i
+		 * ruoli e i synset a esso associati.
+		 * 
+		 * @author Salvi Marco
+		 */
 		public static class Builder
 		{
 			private HashSet<BabelNetSynsetID> babelIds = new HashSet<BabelNetSynsetID>();
@@ -253,28 +322,59 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			private String name;
 			private VerbAtlasFrameID frameId;
 
+			/**
+			 * Costruttore del builder
+			 * 
+			 * @param name    del Frame da costruire
+			 * @param frameId del Frame da costruire
+			 */
 			public Builder(String name, VerbAtlasFrameID frameId)
 			{
 				this.name = name;
 				this.frameId = frameId;
 			}
 
+			/**
+			 * Aggiunge un BabelNetSynsetID all'insieme dei Synset del Frame che si sta
+			 * costruendo.
+			 * 
+			 * @param babelId da aggiungere al Frame
+			 */
 			public void addBabelId(BabelNetSynsetID babelId)
 			{
 				babelIds.add(babelId);
 			}
 
+			/**
+			 * Aggiunge un ruolo Role all'insieme dei Synset del Frame che si sta
+			 * costruendo.
+			 * 
+			 * @param role da aggiungere al Frame
+			 */
 			public void addRole(Role role)
 			{
 				roles.add(role);
 			}
 
+			/**
+			 * Metodo finale per costruire il VerbAtlasFrame.
+			 * 
+			 * @return VerbAtlasFrame con ruoli e synset specificati con il builder
+			 */
 			public VerbAtlasFrame build()
 			{
 				return new VerbAtlasFrame(name, frameId, babelIds, roles);
 			}
 		}
 
+		/**
+		 * Classe che rappresenta un singolo ruolo di un certo Frame o Synset. Contiene:
+		 * il nome del ruolo, un insieme delle preferenze di selezione di tale ruolo in
+		 * tale Synset, un insieme degli argomenti impliciti e un'insieme degli
+		 * argomenti ombra.
+		 * 
+		 * @author Salvi Marco
+		 */
 		public static class Role implements Comparable<Role>
 		{
 			private Type type;
@@ -282,38 +382,73 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 			private HashSet<ImplicitArgument> implicitArguments = new HashSet<ImplicitArgument>();
 			private HashSet<ShadowArgument> shadowArguments = new HashSet<ShadowArgument>();
 
+			/**
+			 * Costruttore della classe.
+			 * 
+			 * @param nome del ruolo che viene convertito in un'istanza dell'enum Type
+			 */
 			public Role(String type)
 			{
 				this.type = Type.valueOf(type.replace('-', '_').toUpperCase());
 			}
 
+			/**
+			 * Aggiunge una preferenza di selezione all'insieme di SelectionalPreference.
+			 * 
+			 * @param SelectionalPreference da aggiungere
+			 */
 			public void addSelectionalPreference(SelectionalPreference sp)
 			{
 				this.sp.add(sp);
 			}
 
-			public void addImplicitArgument(ImplicitArgument impArg) throws RoleNotFocalizedOnSynsetException
+			/**
+			 * Aggiunge un argomento implicito all'insieme di ImplicitArgument.
+			 * 
+			 * @param ImplicitArgument da aggiungere
+			 */
+			public void addImplicitArgument(ImplicitArgument impArg)
 			{
 				this.implicitArguments.add(impArg);
 			}
 
-			public void addShadowArgument(ShadowArgument shadArg) throws RoleNotFocalizedOnSynsetException
+			/**
+			 * Aggiunge un argomento ombra all'insieme di ShadowArgument.
+			 * 
+			 * @param ShadowArgument da aggiungere.
+			 */
+			public void addShadowArgument(ShadowArgument shadArg)
 			{
 				this.shadowArguments.add(shadArg);
 			}
 
+			/**
+			 * Restituisce l'insieme di tutti gli argomenti impliciti associati al ruolo.
+			 * 
+			 * @return HashSet<BabelNetSynsetID> ovvero gli argomenti impliciti
+			 */
 			public HashSet<BabelNetSynsetID> getImplicitArguments()
 			{
 				return implicitArguments.stream().map(x -> x.getBabelSynsetId())
 						.collect(Collectors.toCollection(HashSet::new));
 			}
 
+			/**
+			 * Restituisce l'insieme di tutti gli argomenti ombra associati al ruolo.
+			 * 
+			 * @return HashSet<BabelNetSynsetID> ovvero gli argomenti ombra
+			 */
 			public HashSet<BabelNetSynsetID> getShadowArguments()
 			{
 				return shadowArguments.stream().map(x -> x.getBabelSynsetId())
 						.collect(Collectors.toCollection(HashSet::new));
 			}
 
+			/**
+			 * Restituisce il nome del Ruolo
+			 * 
+			 * @return String nome del ruolo
+			 */
 			public String getType()
 			{
 				String role = type.toString();
@@ -322,6 +457,11 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				return role;
 			}
 
+			/**
+			 * Restituisce l'insieme delle preferenze di selezione associate al ruolo.
+			 * 
+			 * @return TreeSet<SelectionalPreference> ovvero le preferenze di selezione
+			 */
 			public TreeSet<SelectionalPreference> getSelectionalPreferences()
 			{
 				return sp;
@@ -371,6 +511,11 @@ public class VerbAtlas implements Iterable<VerbAtlasFrame>
 				return s + " ]";
 			}
 
+			/**
+			 * Enumerazione di tutti i nomi possibili per un qualunque ruolo.
+			 * 
+			 * @author Salvi
+			 */
 			enum Type
 			{
 				AGENT, ASSET, ATTRIBUTE, BENEFICIARY, CAUSE, CO_AGENT, CO_PATIENT, CO_THEME, DESTINATION, EXPERIENCER,

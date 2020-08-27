@@ -6,19 +6,36 @@ import java.net.URISyntaxException;
 
 import it.uniroma1.nlp.kb.exceptions.BabelNetSynsetIDToVerbAtlasFrameIDException;
 import it.uniroma1.nlp.kb.exceptions.BabelNetSynsetIDToWordNetSynsetIDException;
-import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
 import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 
+/**
+ * Classe che rappresenta un ID di BabelNet
+ * 
+ * @author Salvi Marco
+ */
 public class BabelNetSynsetID extends ResourceID
 {
 	private WordNetSynsetID wordNetId;
 	private VerbAtlasFrameID verbAtlasId;
 
+	/**
+	 * Costruttore della classe
+	 * 
+	 * @param String id
+	 */
 	public BabelNetSynsetID(String id)
 	{
 		super(id);
 	}
 
+	/**
+	 * Restituisce il WordNetSynsetID associato al BabelNetSynsetID
+	 * 
+	 * @return WordNetSynsetID associato al BabelNetSynsetID
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws VerbAtlasException
+	 */
 	public WordNetSynsetID toWordNetID() throws IOException, URISyntaxException, VerbAtlasException
 	{
 		if (wordNetId == null)
@@ -35,6 +52,14 @@ public class BabelNetSynsetID extends ResourceID
 		return wordNetId;
 	}
 
+	/**
+	 * Restituisce il VerbAtlasFrameID al quale è associato.
+	 * 
+	 * @return VerbAtlasFrameID associato al BabelNetSynsetID
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws VerbAtlasException
+	 */
 	public VerbAtlasFrameID toVerbAtlasID() throws IOException, URISyntaxException, VerbAtlasException
 	{
 		if (verbAtlasId == null)

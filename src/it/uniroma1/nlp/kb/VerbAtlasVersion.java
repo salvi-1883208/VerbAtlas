@@ -1,38 +1,43 @@
 package it.uniroma1.nlp.kb;
 
-import java.io.File;
-
-import java.io.FilenameFilter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
 import it.uniroma1.nlp.kb.exceptions.ResourceDateException;
 
+/**
+ * Classe per rappresentare la versione della risorsa VerbAtlas.
+ * 
+ * @author Salvi Marco
+ */
 public class VerbAtlasVersion
 {
-	// TODO dispone di una sola costante con valore determinato sulla base della
-	// cartella da cui saranno caricati i file. Un oggetto VerbAtlasVersion dispone
-	// di un metodo LocalDate getReleaseDate() che restituisce la data di rilascio
-	// della versione (cablata all'interno della classe stessa)
 	private String version;
 
+	/**
+	 * Costruttore della classe.
+	 */
 	public VerbAtlasVersion()
 	{
 		try
 		{
-			
 			version = TextLoader.readVerbAtlasVersion().replace('.', '_');
 			version = "V" + version.substring(version.indexOf("-") + 1);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			version = "The VerbAtlas resource folder can not be found";
+			version = "The VerbAtlas resource folder cannot be found";
 		}
-
 	}
 
+	/**
+	 * Restituisce un oggetto LocalDate che rappresenta la data di rilascio della
+	 * risorsa VerbAtlas.
+	 * 
+	 * @return LocalDate che rappresenta la data di rilascio della risorsa VerbAtlas
+	 * @throws ResourceDateException
+	 */
 	public LocalDate getReleaseDate() throws ResourceDateException
 	{
 		switch (version)
@@ -46,6 +51,11 @@ public class VerbAtlasVersion
 
 	}
 
+	/**
+	 * Restituisce la versione della risorsa VerbAtlas come stringa.
+	 * 
+	 * @return La versione della risorsa VerbAtlas come stringa
+	 */
 	public String getVersion()
 	{
 		return version;
@@ -61,7 +71,7 @@ public class VerbAtlasVersion
 		}
 		catch (ResourceDateException e)
 		{
-			return "VerbAtlas resource " + version + ". Released date unknown.";
+			return version + ". Released date unknown.";
 		}
 	}
 }

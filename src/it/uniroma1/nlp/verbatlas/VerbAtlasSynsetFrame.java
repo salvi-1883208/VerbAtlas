@@ -9,22 +9,39 @@ import it.uniroma1.nlp.kb.ResourceID;
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame;
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 
+/**
+ * Classe che rappresenta un Synset
+ * 
+ * @author Salvi Marco
+ */
 public class VerbAtlasSynsetFrame implements Frame
 {
-	private VerbAtlasFrame frame; // Frame di cui questo synset fa parte
+	private VerbAtlasFrame frame;
 	private BabelNetSynsetID synsetId;
 	private TreeSet<Role> roles;
 	private String name;
 
+	/**
+	 * Costruttore di VerbAtlasSynsetFrame
+	 * 
+	 * @param frame    di cui il synset fa parte
+	 * @param synsetId del synset
+	 * @param roles    del synset
+	 * @param name     del synset
+	 */
 	public VerbAtlasSynsetFrame(VerbAtlasFrame frame, BabelNetSynsetID synsetId, TreeSet<Role> roles, String name)
 	{
 		this.frame = frame;
 		this.synsetId = synsetId;
 		this.roles = roles;
 		this.name = name;
-
 	}
 
+	/**
+	 * Restituisce il frame di cui questo synset fa parte.
+	 * 
+	 * @return VerbAtlasFrame di cui questo synset fa parte
+	 */
 	public VerbAtlasFrame toFrame()
 	{
 		return frame;

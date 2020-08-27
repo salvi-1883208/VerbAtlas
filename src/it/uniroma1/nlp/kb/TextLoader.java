@@ -10,10 +10,25 @@ import java.util.List;
 
 import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
 
+/**
+ * Classe di utilità principalmente per leggere dei file di testo dalle
+ * resources.
+ * 
+ * @author Salvi Marco
+ */
 public class TextLoader
 {
 	private static String verbAtlasResourceFolderName;
 
+	/**
+	 * Restituisce una lista contenente tutte le righe del file fornito in input.
+	 * 
+	 * @param nome del file da convertire in lista.
+	 * @return List<Stirng> contenente tutte le righe del file
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MissingVerbAtlasResourceException
+	 */
 	public static List<String> loadTxt(String path)
 			throws IOException, URISyntaxException, MissingVerbAtlasResourceException
 	{
@@ -25,6 +40,13 @@ public class TextLoader
 		return file;
 	}
 
+	/**
+	 * Restituisce una stringa che rappresenta la versione della risorsa VerbAtlas
+	 * se presente.
+	 * 
+	 * @return String version.
+	 * @throws MissingVerbAtlasResourceException
+	 */
 	public static String readVerbAtlasVersion() throws MissingVerbAtlasResourceException
 	{
 		for (String string : TextLoader.readDirectories())

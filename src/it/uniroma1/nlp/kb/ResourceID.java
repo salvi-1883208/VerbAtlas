@@ -1,14 +1,30 @@
 package it.uniroma1.nlp.kb;
 
+/**
+ * Classe astratta che rappresenta i vari tipi di ID contenuti all'intero della
+ * risorsa VerbAtlas.
+ * 
+ * @author Salvi Marco
+ */
 public abstract class ResourceID
 {
 	private String id;
 
+	/**
+	 * Costruttore della classe
+	 * 
+	 * @param String id
+	 */
 	public ResourceID(String id)
 	{
 		this.id = id;
 	}
 
+	/**
+	 * Restituisce l'id come Stringa.
+	 * 
+	 * @return String id
+	 */
 	public String getId()
 	{
 		return id;

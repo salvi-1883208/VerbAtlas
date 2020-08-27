@@ -5,16 +5,31 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.TreeSet;
 
-import it.uniroma1.nlp.kb.exceptions.MissingVerbAtlasResourceException;
-import it.uniroma1.nlp.kb.exceptions.RoleNotFocalizedOnSynsetException;
 import it.uniroma1.nlp.kb.exceptions.VerbAtlasException;
 import it.uniroma1.nlp.kb.exceptions.WordNetIDToLemmaException;
 import it.uniroma1.nlp.verbatlas.VerbAtlasSynsetFrame;
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame;
 import it.uniroma1.nlp.verbatlas.VerbAtlas.VerbAtlasFrame.Role;
 
+/**
+ * Factory per costruire istanze di VerbAtlasSynsetFrame
+ * 
+ * @author Salvi Marco
+ */
 public class VerbAtlasSynsetFrameFactory
 {
+	/**
+	 * Restituisce un VerbAtlasSynsetFrame costruito con i parametri forniti in
+	 * input.
+	 * 
+	 * @param id    del Synset
+	 * @param frame del quale questo synset fa parte
+	 * @param roles del synset
+	 * @return VerbAtlasSynsetFrame
+	 * @throws VerbAtlasException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
 	public VerbAtlasSynsetFrame buildSynsetFrame(BabelNetSynsetID id, VerbAtlasFrame frame, TreeSet<Role> roles)
 			throws VerbAtlasException, IOException, URISyntaxException
 	{
